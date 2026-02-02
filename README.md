@@ -13,7 +13,7 @@ Ensure you have the following installed on your machine:
 
 - **Runtime**: Node.js
 - **Framework**: Express.js
-- **Database**: MongoDB (with Mongoose ODM)
+- **Database**: MongoDB 6.0 (with Mongoose ODM)
 - **Authentication**: JSON Web Tokens (JWT)
 - **Security**: bcryptjs (Password hashing), CORS enabled
 

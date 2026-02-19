@@ -1,0 +1,408 @@
+{
+  "collections": {
+    "m1-p13-nyavo-fitia.users": {
+      "ns": "m1-p13-nyavo-fitia.users",
+      "jsonSchema": {
+        "bsonType": "object",
+        "properties": {
+          "user_id": {
+            "bsonType": "string"
+          },
+          "username": {
+            "bsonType": "string"
+          },
+          "name": {
+            "bsonType": "string"
+          },
+          "firebaseUid": {
+            "bsonType": "string"
+          },
+          "provider": {
+            "bsonType": [
+              "string"
+            ]
+          },
+          "email": {
+            "bsonType": "string"
+          },
+          "role": {
+            "bsonType": [
+              "int"
+            ]
+          }
+        }
+      }
+    },
+    "m1-p13-nyavo-fitia.shops": {
+      "ns": "m1-p13-nyavo-fitia.shops",
+      "jsonSchema": {
+        "bsonType": "object",
+        "properties": {
+          "_id": {
+            "bsonType": "objectId"
+          },
+          "tenantId": {
+            "bsonType": "string"
+          },
+          "boxId": {
+            "bsonType": "string"
+          },
+          "name": {
+            "bsonType": "string"
+          },
+          "shopRef": {
+            "bsonType": "string"
+          }
+        },
+        "required": [
+          "_id"
+        ]
+      }
+    },
+    "m1-p13-nyavo-fitia.boxes": {
+      "ns": "m1-p13-nyavo-fitia.boxes",
+      "jsonSchema": {
+        "bsonType": "object",
+        "properties": {
+          "_id": {
+            "bsonType": "objectId"
+          },
+          "boxId": {
+            "bsonType": [
+              "string"
+            ]
+          },
+          "used": {
+            "bsonType": [
+              "bool"
+            ]
+          },
+          "tenantId": {
+            "bsonType": "string"
+          }
+        },
+        "required": [
+          "_id"
+        ]
+      }
+    },
+    "m1-p13-nyavo-fitia.products": {
+      "ns": "m1-p13-nyavo-fitia.products",
+      "jsonSchema": {
+        "bsonType": "object",
+        "properties": {
+          "_id": {
+            "bsonType": "objectId"
+          },
+          "productRef": {
+            "bsonType": "string"
+          },
+          "price": {
+            "bsonType": [
+              "double"
+            ]
+          },
+          "name": {
+            "bsonType": "string"
+          },
+          "description": {
+            "bsonType": "string"
+          },
+          "imageUrl": {
+            "bsonType": "string"
+          },
+          "shopRef": {
+            "bsonType": "string"
+          }
+        },
+        "required": [
+          "_id"
+        ]
+      }
+    },
+    "m1-p13-nyavo-fitia.orders": {
+      "ns": "m1-p13-nyavo-fitia.orders",
+      "jsonSchema": {
+        "bsonType": "object",
+        "properties": {
+          "_id": {
+            "bsonType": "objectId"
+          },
+          "orderRef": {
+            "bsonType": "string"
+          },
+          "buyerId": {
+            "bsonType": "string"
+          },
+          "shopId": {
+            "bsonType": "string"
+          },
+          "items": {
+            "bsonType": "array",
+            "items": {}
+          },
+          "total": {
+            "bsonType": [
+              "double"
+            ]
+          },
+          "status": {
+            "bsonType": "string"
+          }
+        },
+        "required": [
+          "_id"
+        ]
+      }
+    },
+    "m1-p13-nyavo-fitia.stock_movement": {
+      "ns": "m1-p13-nyavo-fitia.stock_movement",
+      "jsonSchema": {
+        "bsonType": "object",
+        "properties": {
+          "_id": {
+            "bsonType": "objectId"
+          },
+          "mvtRef": {
+            "bsonType": "string"
+          },
+          "type": {
+            "bsonType": "string"
+          },
+          "performedBy": {
+            "bsonType": "string"
+          },
+          "items": {
+            "bsonType": "array",
+            "items": {}
+          }
+        },
+        "required": [
+          "_id"
+        ]
+      }
+    },
+    "m1-p13-nyavo-fitia.sales": {
+      "ns": "m1-p13-nyavo-fitia.sales",
+      "jsonSchema": {
+        "bsonType": "object",
+        "properties": {
+          "_id": {
+            "bsonType": "objectId"
+          },
+          "salesRef": {
+            "bsonType": "string"
+          },
+          "shopRef": {
+            "bsonType": "string"
+          },
+          "totalAmount": {
+            "bsonType": [
+              "double"
+            ]
+          },
+          "orderRef": {
+            "bsonType": "string"
+          },
+          "channel": {
+            "bsonType": "string"
+          },
+          "paymentMethod": {
+            "bsonType": [
+              "string"
+            ]
+          },
+          "items": {
+            "bsonType": "array",
+            "items": {}
+          }
+        },
+        "required": [
+          "_id"
+        ]
+      }
+    }
+  },
+  "relationships": [
+    {
+      "id": "749e130c-5b7f-4f90-81ec-cf65fc2ba28e",
+      "relationship": [
+        {
+          "ns": "m1-p13-nyavo-fitia.users",
+          "cardinality": 1,
+          "fields": [
+            "user_id"
+          ]
+        },
+        {
+          "ns": "m1-p13-nyavo-fitia.shops",
+          "cardinality": null,
+          "fields": [
+            "tenantId"
+          ]
+        }
+      ],
+      "isInferred": false
+    },
+    {
+      "id": "7caf82c8-6835-43aa-92b2-d01ae0c3c41d",
+      "relationship": [
+        {
+          "ns": "m1-p13-nyavo-fitia.boxes",
+          "cardinality": 1,
+          "fields": [
+            "boxId"
+          ]
+        },
+        {
+          "ns": "m1-p13-nyavo-fitia.shops",
+          "cardinality": null,
+          "fields": [
+            "boxId"
+          ]
+        }
+      ],
+      "isInferred": false
+    },
+    {
+      "id": "1179b397-39a5-4303-92a8-3a220bd2e619",
+      "relationship": [
+        {
+          "ns": "m1-p13-nyavo-fitia.shops",
+          "cardinality": 1,
+          "fields": [
+            "shopRef"
+          ]
+        },
+        {
+          "ns": "m1-p13-nyavo-fitia.products",
+          "cardinality": null,
+          "fields": [
+            "shopRef"
+          ]
+        }
+      ],
+      "isInferred": false
+    },
+    {
+      "id": "c5f09cbe-c5da-4f10-b0af-f20694d8bdeb",
+      "relationship": [
+        {
+          "ns": "m1-p13-nyavo-fitia.users",
+          "cardinality": 1,
+          "fields": [
+            "user_id"
+          ]
+        },
+        {
+          "ns": "m1-p13-nyavo-fitia.boxes",
+          "cardinality": 1,
+          "fields": [
+            "tenantId"
+          ]
+        }
+      ],
+      "isInferred": false
+    },
+    {
+      "id": "610f1805-14ee-48f2-96f1-80eafeac6444",
+      "relationship": [
+        {
+          "ns": "m1-p13-nyavo-fitia.users",
+          "cardinality": 1,
+          "fields": [
+            "user_id"
+          ]
+        },
+        {
+          "ns": "m1-p13-nyavo-fitia.orders",
+          "cardinality": null,
+          "fields": [
+            "buyerId"
+          ]
+        }
+      ],
+      "isInferred": false
+    },
+    {
+      "id": "c3598477-8eab-4fe4-bdef-8f2418470d1c",
+      "relationship": [
+        {
+          "ns": "m1-p13-nyavo-fitia.shops",
+          "cardinality": 1,
+          "fields": [
+            "shopRef"
+          ]
+        },
+        {
+          "ns": "m1-p13-nyavo-fitia.orders",
+          "cardinality": null,
+          "fields": [
+            "shopId"
+          ]
+        }
+      ],
+      "isInferred": false
+    },
+    {
+      "id": "48da797a-0db7-4be1-ad4a-28880ec48bf9",
+      "relationship": [
+        {
+          "ns": "m1-p13-nyavo-fitia.users",
+          "cardinality": 1,
+          "fields": [
+            "user_id"
+          ]
+        },
+        {
+          "ns": "m1-p13-nyavo-fitia.stock_movement",
+          "cardinality": 1,
+          "fields": [
+            "performedBy"
+          ]
+        }
+      ],
+      "isInferred": false
+    },
+    {
+      "id": "2f305fa2-6069-4cc7-bf40-9b9123a0a8cb",
+      "relationship": [
+        {
+          "ns": "m1-p13-nyavo-fitia.orders",
+          "cardinality": 1,
+          "fields": [
+            "orderRef"
+          ]
+        },
+        {
+          "ns": "m1-p13-nyavo-fitia.sales",
+          "cardinality": null,
+          "fields": [
+            "orderRef"
+          ]
+        }
+      ],
+      "isInferred": false
+    },
+    {
+      "id": "63e4aa74-18e2-4138-8228-54af67b1e8fa",
+      "relationship": [
+        {
+          "ns": "m1-p13-nyavo-fitia.shops",
+          "cardinality": 1,
+          "fields": [
+            "shopRef"
+          ]
+        },
+        {
+          "ns": "m1-p13-nyavo-fitia.sales",
+          "cardinality": null,
+          "fields": [
+            "shopRef"
+          ]
+        }
+      ],
+      "isInferred": false
+    }
+  ]
+}

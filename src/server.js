@@ -1,11 +1,41 @@
-require('dotenv').config();
-const mongoose = require('mongoose');
-const app = require('./app');
+import 'dotenv/config';
+import app from './app.js';
+import connectDB from './config/db.js';
+import { initFirebase } from './config/firebase.js';
+import logger from './utils/logger.js';
 
 const PORT = process.env.PORT || 3000;
 
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('MongoDB connected'))
-  .catch(err => console.error(err));
+// Initialize Database and Services
+const startServer = async () => {
+  try {
+    // 1. Connect to MongoDB
+    await connectDB();
 
-app.listen(PORT, () => console.log('Server running on port', PORT));
+    // 2. Initialize Firebase Admin
+    initFirebase();
+
+    // 3. Start Listening
+    const server = app.listen(PORT, () => {
+      logger.info(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
+    });
+
+    // Handle Graceful Shutdown
+    const shutdown = () => {
+      logger.info('SIGTERM signal received: closing HTTP server');
+      server.close(() => {
+        logger.info('HTTP server closed');
+        process.exit(0);
+      });
+    };
+
+    process.on('SIGTERM', shutdown);
+    process.on('SIGINT', shutdown);
+
+  } catch (error) {
+    logger.error(`Critical Error during startup: ${error.message}`);
+    process.exit(1);
+  }
+};
+
+startServer();

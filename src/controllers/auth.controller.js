@@ -84,11 +84,18 @@ class AuthController {
 
       const credentials = schema.parse(req.body);
 
-      // 1. Authenticate via Service
+      // 1. Authenticate via Service (Firebase)
       const authResult = await authService.login(credentials);
 
       // 2. Sync/Get from MongoDB
-      const user = await authService.getUserByUid(authResult.uid);
+      let user;
+      if (authResult.decodedToken) {
+        // Social Login: Registration "goes within" the login flow
+        user = await authService.syncUserWithMongo(authResult.decodedToken);
+      } else {
+        // Manual Login: User must already exist in MongoDB
+        user = await authService.getUserByUid(authResult.uid);
+      }
 
       if (!user) {
         const error = new Error('User authenticated in Firebase but not found in MongoDB. Please register first.');

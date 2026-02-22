@@ -18,6 +18,7 @@ class AuthService {
         if (idToken) {
             const decodedToken = await this.verifyFirebaseToken(idToken);
             uid = decodedToken.uid;
+            return { uid, decodedToken };
         } else {
             // Manual Login using Firebase REST API
             const apiKey = process.env.FIREBASE_API_KEY;
@@ -42,12 +43,8 @@ class AuthService {
             }
 
             uid = data.localId;
-            // Note: In a real app, you'd want to return the idToken from data to the frontend
-            // so they can use it in Subsequent Bearer headers.
             return { uid, idToken: data.idToken, refreshToken: data.refreshToken };
         }
-
-        return { uid };
     }
 
     /**
@@ -155,6 +152,7 @@ class AuthService {
      * Get user by Firebase UID.
      */
     async getUserByUid(uid) {
+        console.log(uid)
         return await User.findOne({ firebaseUid: uid });
     }
 }

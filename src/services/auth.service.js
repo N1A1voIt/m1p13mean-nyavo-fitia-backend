@@ -18,7 +18,7 @@ class AuthService {
         if (idToken) {
             const decodedToken = await this.verifyFirebaseToken(idToken);
             uid = decodedToken.uid;
-            return { uid, decodedToken };
+            return { uid, decodedToken, idToken };
         } else {
             // Manual Login using Firebase REST API
             const apiKey = process.env.FIREBASE_API_KEY;
@@ -76,7 +76,6 @@ class AuthService {
         } else {
             // Update existing user if necessary
             user.name = name || user.name;
-            // We could also update the provider if it changed, though usually it's static per UID
             await user.save();
         }
 
@@ -85,14 +84,13 @@ class AuthService {
 
     /**
      * Registers a new user or shop.
-     * If idToken is provided, it syncs a social login.
-     * If email/password are provided, it creates the user in Firebase and Mongo.
      * @param {object} userData 
      */
     async register(userData) {
         const { email, password, name, username, role, shopName, idToken } = userData;
         let uid;
         let provider = 'password';
+        let returnedToken = idToken;
 
         if (idToken) {
             // Social Login Sync
@@ -100,21 +98,27 @@ class AuthService {
             uid = decodedToken.uid;
             provider = decodedToken.firebase.sign_in_provider === 'password' ? 'password' : 'google';
         } else {
-            // Manual Email/Password Creation
-            try {
-                const firebaseUser = await admin.auth().createUser({
-                    email,
-                    password,
-                    displayName: name,
-                });
-                uid = firebaseUser.uid;
-            } catch (error) {
-                if (error.code === 'auth/email-already-exists') {
-                    error.status = 400;
-                    error.message = 'An account with this email already exists in Firebase';
-                }
+            // Manual Email/Password Creation via REST API to get token immediately
+            const apiKey = process.env.FIREBASE_API_KEY;
+            const response = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${apiKey}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password, returnSecureToken: true }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                const error = new Error(data.error?.message || 'Registration failed');
+                error.status = 400;
                 throw error;
             }
+
+            uid = data.localId;
+            returnedToken = data.idToken;
+
+            // Update profile with name in Firebase
+            await admin.auth().updateUser(uid, { displayName: name });
         }
 
         // Check if user already exists in MongoDB
@@ -145,6 +149,8 @@ class AuthService {
             });
         }
 
+        // Attach token for the controller to return
+        user._doc.firebaseToken = returnedToken;
         return user;
     }
 
@@ -152,7 +158,6 @@ class AuthService {
      * Get user by Firebase UID.
      */
     async getUserByUid(uid) {
-        console.log(uid)
         return await User.findOne({ firebaseUid: uid });
     }
 }

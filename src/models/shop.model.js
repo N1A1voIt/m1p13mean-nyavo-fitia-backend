@@ -4,7 +4,6 @@ const shopSchema = new mongoose.Schema({
     tenantId: {
         type: String, // Firebase UID of the owner
         required: true,
-        unique: true,
     },
     name: {
         type: String,

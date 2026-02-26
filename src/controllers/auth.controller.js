@@ -186,7 +186,8 @@ class AuthController {
           email: user.email,
           name: user.name,
           role: user.role,
-        }
+        },
+        firebaseToken: user.firebaseToken || data.idToken
       }, 201));
     } catch (error) {
       if (error instanceof z.ZodError) {

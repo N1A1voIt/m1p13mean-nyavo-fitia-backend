@@ -20,6 +20,14 @@ export const getBoxRequests = async (page = 1, limit = 10) => {
   return { requests, total };
 };
 
+export const getBoxRequestByShopId = async (shopId) => {
+  return BoxRequest.findOne({ shop: shopId }).sort({ createdAt: -1 });
+};
+
+export const getBoxRequestsByShopIds = async (shopIds) => {
+  return BoxRequest.find({ shop: { $in: shopIds } }).sort({ createdAt: -1 });
+};
+
 export const assignBoxToRequest = async (requestId, assignedBox) => {
   const request = await BoxRequest.findById(requestId);
   if (!request) throw new Error('Request not found');

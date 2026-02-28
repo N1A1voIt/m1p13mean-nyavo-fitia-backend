@@ -26,7 +26,7 @@ app.use('/api/auth', require('./routes/authRoutes'));
 // app.use('/api/finance', require('./routes/financeRoutes'));
 // app.use('/api/rh', require('./routes/rhRoutes'));
 // app.use('/api/events', require('./routes/eventRoutes'));
-// app.use('/api/shop-erp', require('./routes/shopERPRoutes'));
+app.use('/api/shop-erp', require('./routes/shopERPRoutes'));
 // app.use('/api/sales', require('./routes/saleRoutes'));
 // app.use('/api/orders', require('./routes/orderRoutes'));
 // app.use('/api/map', require('./routes/mapRoutes'));

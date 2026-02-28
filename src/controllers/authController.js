@@ -1,5 +1,5 @@
 const authService = require('../services/authService');
-const asyncHandler = require('../middlewares/asyncHandler');
+const asyncHandler = require('../middleware/asyncHandler');
 
 /**
  * Controller for Auth related requests.

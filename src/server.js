@@ -1,41 +1,76 @@
-import 'dotenv/config';
-import app from './app.js';
-import connectDB from './config/db.js';
-import { initFirebase } from './config/firebase.js';
-import logger from './utils/logger.js';
+require('dotenv').config();
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const helmet = require('helmet');
+const morgan = require('morgan');
+const errorMiddleware = require('./middlewares/errorMiddleware');
 
+const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Initialize Database and Services
-const startServer = async () => {
-  try {
-    // 1. Connect to MongoDB
-    await connectDB();
+// Middleware
+app.use(helmet()); // Security headers
+app.use(cors());
+app.use(express.json());
+if (process.env.NODE_ENV === 'development') {
+    app.use(morgan('dev')); // Logging
+}
 
-    // 2. Initialize Firebase Admin
-    initFirebase();
+// Routes
+app.use('/api/auth', require('./routes/authRoutes'));
+// app.use('/api/shop-requests', require('./routes/shopRequestRoutes'));
+// app.use('/api/boxes', require('./routes/boxRoutes'));
+// app.use('/api/billing', require('./routes/billingRoutes'));
+// app.use('/api/utilities', require('./routes/utilityRoutes'));
+// app.use('/api/finance', require('./routes/financeRoutes'));
+// app.use('/api/rh', require('./routes/rhRoutes'));
+// app.use('/api/events', require('./routes/eventRoutes'));
+// app.use('/api/shop-erp', require('./routes/shopERPRoutes'));
+// app.use('/api/sales', require('./routes/saleRoutes'));
+// app.use('/api/orders', require('./routes/orderRoutes'));
+// app.use('/api/map', require('./routes/mapRoutes'));
+// app.use('/api/loyalty', require('./routes/loyaltyRoutes'));
+// app.use('/api/reservations', require('./routes/reservationRoutes'));
+// app.use('/api/notifications', require('./routes/notificationRoutes'));
+// app.use('/api/cart', require('./routes/cartRoutes'));
 
-    // 3. Start Listening
-    const server = app.listen(PORT, () => {
-      logger.info(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
-    });
+// Basic Health Route
+app.get('/api/health', (req, res) => {
+    res.json({ success: true, message: 'Maal Management API is live 🚀' });
+});
 
-    // Handle Graceful Shutdown
-    const shutdown = () => {
-      logger.info('SIGTERM signal received: closing HTTP server');
-      server.close(() => {
-        logger.info('HTTP server closed');
-        process.exit(0);
-      });
-    };
+// ===== Scheduled Jobs =====
+// Run daily billing check every 24h (on startup + interval)
+// const { runDailyBillingCheck } = require('../execution/jobs/billingCron');
+// mongoose.connection.once('open', () => {
+    // Run once on startup (after DB is connected)
+    // setTimeout(() => {
+    //     runDailyBillingCheck().catch(err => console.error('[STARTUP CRON]', err.message));
+    // }, 5000);
 
-    process.on('SIGTERM', shutdown);
-    process.on('SIGINT', shutdown);
+    // Then every 24 hours
+    // setInterval(() => {
+    //     runDailyBillingCheck().catch(err => console.error('[DAILY CRON]', err.message));
+    // }, 24 * 60 * 60 * 1000);
+// });
 
-  } catch (error) {
-    logger.error(`Critical Error during startup: ${error.message}`);
-    process.exit(1);
-  }
-};
+// 404 Handler
+app.use((req, res, next) => {
+    const error = new Error(`Not Found - ${req.originalUrl}`);
+    error.statusCode = 404;
+    next(error);
+});
 
-startServer();
+// Global Error Handler
+app.use(errorMiddleware);
+
+// Database Connection
+mongoose.connect(process.env.MONGODB_URI)
+    .then(() => console.log('MongoDB connected'))
+    .catch(err => console.error('Error connecting to MongoDB:', err));
+
+// Start Server
+app.listen(PORT, () => {
+    console.log(`Server is running in ${process.env.NODE_ENV || 'development'} mode on http://localhost:${PORT}`);
+});

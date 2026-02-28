@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
-const errorMiddleware = require('./middlewares/errorMiddleware');
+const errorMiddleware = require('./middleware/errorMiddleware');
 
 const app = express();
 const PORT = process.env.PORT || 3000;

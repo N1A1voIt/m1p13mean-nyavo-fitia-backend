@@ -39,7 +39,9 @@ app.use('/api/cart', require('./routes/cartRoutes'));
 app.get('/api/health', (req, res) => {
     res.json({ success: true, message: 'Maal Management API is live 🚀' });
 });
-
+app.get('/', (req, res) => {
+    res.send('Welcome to the Maal Management API! Visit /api/health for status.');
+});
 // ===== Scheduled Jobs =====
 // Run daily billing check every 24h (on startup + interval)
 // const { runDailyBillingCheck } = require('../execution/jobs/billingCron');

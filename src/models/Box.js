@@ -17,7 +17,7 @@ const boxSchema = new mongoose.Schema({
     },
     type: {
         type: String,
-        enum: ['Boutique', 'Kiosque', 'FoodCourt'],
+        enum: ['Boutique', 'Kiosque', 'FoodCourt', 'HairSalon'],
         required: true
     },
     status: {

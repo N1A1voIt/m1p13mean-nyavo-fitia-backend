@@ -30,8 +30,8 @@ app.use('/api/shop-erp', require('./routes/shopERPRoutes'));
 app.use('/api/sales', require('./routes/saleRoutes'));
 app.use('/api/orders', require('./routes/orderRoutes'));
 app.use('/api/map', require('./routes/mapRoutes'));
-// app.use('/api/loyalty', require('./routes/loyaltyRoutes'));
-// app.use('/api/reservations', require('./routes/reservationRoutes'));
+app.use('/api/loyalty', require('./routes/loyaltyRoutes'));
+app.use('/api/reservations', require('./routes/reservationRoutes'));
 // app.use('/api/notifications', require('./routes/notificationRoutes'));
 app.use('/api/cart', require('./routes/cartRoutes'));
 
@@ -44,15 +44,15 @@ app.get('/api/health', (req, res) => {
 // Run daily billing check every 24h (on startup + interval)
 // const { runDailyBillingCheck } = require('../execution/jobs/billingCron');
 // mongoose.connection.once('open', () => {
-    // Run once on startup (after DB is connected)
-    // setTimeout(() => {
-    //     runDailyBillingCheck().catch(err => console.error('[STARTUP CRON]', err.message));
-    // }, 5000);
+// Run once on startup (after DB is connected)
+// setTimeout(() => {
+//     runDailyBillingCheck().catch(err => console.error('[STARTUP CRON]', err.message));
+// }, 5000);
 
-    // Then every 24 hours
-    // setInterval(() => {
-    //     runDailyBillingCheck().catch(err => console.error('[DAILY CRON]', err.message));
-    // }, 24 * 60 * 60 * 1000);
+// Then every 24 hours
+// setInterval(() => {
+//     runDailyBillingCheck().catch(err => console.error('[DAILY CRON]', err.message));
+// }, 24 * 60 * 60 * 1000);
 // });
 
 // 404 Handler

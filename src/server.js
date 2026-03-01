@@ -25,7 +25,7 @@ app.use('/api/billing', require('./routes/billingRoutes'));
 // app.use('/api/utilities', require('./routes/utilityRoutes'));
 app.use('/api/finance', require('./routes/financeRoutes'));
 // app.use('/api/rh', require('./routes/rhRoutes'));
-// app.use('/api/events', require('./routes/eventRoutes'));
+app.use('/api/events', require('./routes/eventRoutes'));
 app.use('/api/shop-erp', require('./routes/shopERPRoutes'));
 app.use('/api/sales', require('./routes/saleRoutes'));
 app.use('/api/orders', require('./routes/orderRoutes'));
@@ -33,7 +33,7 @@ app.use('/api/map', require('./routes/mapRoutes'));
 // app.use('/api/loyalty', require('./routes/loyaltyRoutes'));
 // app.use('/api/reservations', require('./routes/reservationRoutes'));
 // app.use('/api/notifications', require('./routes/notificationRoutes'));
-// app.use('/api/cart', require('./routes/cartRoutes'));
+app.use('/api/cart', require('./routes/cartRoutes'));
 
 // Basic Health Route
 app.get('/api/health', (req, res) => {

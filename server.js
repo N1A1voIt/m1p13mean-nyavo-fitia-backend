@@ -19,21 +19,21 @@ if (process.env.NODE_ENV === 'development') {
 
 // Routes
 app.use('/api/auth', require('./routes/authRoutes'));
-// app.use('/api/shop-requests', require('./routes/shopRequestRoutes'));
+app.use('/api/shop-requests', require('./routes/shopRequestRoutes'));
 app.use('/api/boxes', require('./routes/boxRoutes'));
 app.use('/api/billing', require('./routes/billingRoutes'));
-// app.use('/api/utilities', require('./routes/utilityRoutes'));
+app.use('/api/utilities', require('./routes/utilityRoutes'));
 app.use('/api/finance', require('./routes/financeRoutes'));
-// app.use('/api/rh', require('./routes/rhRoutes'));
-// app.use('/api/events', require('./routes/eventRoutes'));
+app.use('/api/rh', require('./routes/rhRoutes'));
+app.use('/api/events', require('./routes/eventRoutes'));
 app.use('/api/shop-erp', require('./routes/shopERPRoutes'));
 app.use('/api/sales', require('./routes/saleRoutes'));
 app.use('/api/orders', require('./routes/orderRoutes'));
 app.use('/api/map', require('./routes/mapRoutes'));
-// app.use('/api/loyalty', require('./routes/loyaltyRoutes'));
-// app.use('/api/reservations', require('./routes/reservationRoutes'));
-// app.use('/api/notifications', require('./routes/notificationRoutes'));
-// app.use('/api/cart', require('./routes/cartRoutes'));
+app.use('/api/loyalty', require('./routes/loyaltyRoutes'));
+app.use('/api/reservations', require('./routes/reservationRoutes'));
+app.use('/api/notifications', require('./routes/notificationRoutes'));
+app.use('/api/cart', require('./routes/cartRoutes'));
 
 // Basic Health Route
 app.get('/api/health', (req, res) => {
@@ -42,18 +42,18 @@ app.get('/api/health', (req, res) => {
 
 // ===== Scheduled Jobs =====
 // Run daily billing check every 24h (on startup + interval)
-// const { runDailyBillingCheck } = require('../execution/jobs/billingCron');
-// mongoose.connection.once('open', () => {
+const { runDailyBillingCheck } = require('../execution/jobs/billingCron');
+mongoose.connection.once('open', () => {
     // Run once on startup (after DB is connected)
-    // setTimeout(() => {
-    //     runDailyBillingCheck().catch(err => console.error('[STARTUP CRON]', err.message));
-    // }, 5000);
+    setTimeout(() => {
+        runDailyBillingCheck().catch(err => console.error('[STARTUP CRON]', err.message));
+    }, 5000);
 
     // Then every 24 hours
-    // setInterval(() => {
-    //     runDailyBillingCheck().catch(err => console.error('[DAILY CRON]', err.message));
-    // }, 24 * 60 * 60 * 1000);
-// });
+    setInterval(() => {
+        runDailyBillingCheck().catch(err => console.error('[DAILY CRON]', err.message));
+    }, 24 * 60 * 60 * 1000);
+});
 
 // 404 Handler
 app.use((req, res, next) => {

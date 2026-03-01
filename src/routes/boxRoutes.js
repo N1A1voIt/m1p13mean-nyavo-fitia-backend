@@ -14,19 +14,17 @@ const {
 const { protect, authorize } = require('../middleware/authMiddleware');
 
 router.use(protect);
-router.use(authorize('admin'));
-
 router.route('/')
     .get(getBoxes)
-    .post(createBox);
+    .post(authorize('admin'), createBox);
 
 router.route('/:id')
     .get(getBox)
-    .patch(updateBox)
-    .delete(deleteBox);
+    .patch(authorize('admin'), updateBox)
+    .delete(authorize('admin'), deleteBox);
 
-router.post('/:id/assign', assignTenant);
-router.post('/:id/release', releaseTenant);
-router.get('/:id/contract', getBoxContract);
+router.post('/:id/assign', authorize('admin'), assignTenant);
+router.post('/:id/release', authorize('admin'), releaseTenant);
+router.get('/:id/contract', authorize('admin'), getBoxContract);
 
 module.exports = router;

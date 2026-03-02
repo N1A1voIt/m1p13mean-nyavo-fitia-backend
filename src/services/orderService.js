@@ -34,6 +34,19 @@ class OrderService {
         if (!orderData.description) {
             orderData.description = `Digital Order containing ${orderData.items.length} item(s)`;
         }
+
+        // Final stock check before checkout
+        for (const item of orderData.items) {
+            const product = await Product.findById(item.productId);
+            if (!product) throw new Error(`Product ${item.name} not found`);
+            if (product.stock < item.quantity) {
+                throw new Error(`Insufficient stock for ${product.name}. Available: ${product.stock}, Requested: ${item.quantity}`);
+            }
+            if (!product.active) {
+                throw new Error(`${product.name} is currently out of sale`);
+            }
+        }
+
         return await Order.create(orderData);
     }
 

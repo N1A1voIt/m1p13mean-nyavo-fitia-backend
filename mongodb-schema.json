@@ -1,0 +1,229 @@
+{
+  "collections": {
+    "Box": {
+      "boxNumber": { "type": "String", "required": true, "unique": true, "trim": true },
+      "location": {
+        "floor": { "type": "Number", "required": true },
+        "zone": { "type": "String", "required": true },
+        "pos": {
+          "x": { "type": "Number", "default": 30 },
+          "y": { "type": "Number", "default": 20 }
+        }
+      },
+      "type": { "type": "String", "enum": ["Boutique", "Kiosque", "FoodCourt", "HairSalon"], "required": true },
+      "status": { "type": "String", "enum": ["Libre", "Occupé", "En travaux"], "default": "Libre" },
+      "dimensions": {
+        "length": { "type": "Number" },
+        "width": { "type": "Number" }
+      },
+      "pricePerMonth": { "type": "Number", "required": true },
+      "currentTenant": { "type": "ObjectId", "ref": "User", "default": null },
+      "history": [{
+        "tenantId": { "type": "ObjectId", "ref": "User" },
+        "from": { "type": "Date" },
+        "to": { "type": "Date" },
+        "contractUrl": { "type": "String" }
+      }],
+      "createdAt": { "type": "Date", "default": "Date.now" }
+    },
+    "Cart": {
+      "userId": { "type": "ObjectId", "ref": "User", "required": true, "unique": true },
+      "items": [{
+        "product": { "type": "ObjectId", "ref": "Product", "required": true },
+        "quantity": { "type": "Number", "required": true, "min": 1 }
+      }],
+      "updatedAt": { "type": "Date", "default": "Date.now" }
+    },
+    "Contract": {
+      "boxId": { "type": "ObjectId", "ref": "Box", "required": true },
+      "tenantId": { "type": "ObjectId", "ref": "User", "required": true },
+      "startDate": { "type": "Date", "required": true, "default": "Date.now" },
+      "endDate": { "type": "Date", "required": true },
+      "monthlyRent": { "type": "Number", "required": true },
+      "depositAmount": { "type": "Number", "default": 0 },
+      "status": { "type": "String", "enum": ["Active", "Expired", "Terminated", "Pending"], "default": "Active" },
+      "terms": { "type": "String", "default": "" },
+      "contractUrl": { "type": "String", "default": "" },
+      "renewalNotice": { "type": "Number", "default": 30 },
+      "createdAt": { "type": "Date", "default": "Date.now" }
+    },
+    "Event": {
+      "title": { "type": "String", "required": true, "trim": true },
+      "description": { "type": "String" },
+      "type": { "type": "String", "enum": ["Ad", "Event", "Promo"], "required": true },
+      "category": { "type": "String", "required": true },
+      "start": { "type": "Date", "required": true },
+      "end": { "type": "Date", "required": true },
+      "location": { "type": "String" },
+      "status": { "type": "String", "enum": ["Draft", "Confirmed", "Live", "Ended"], "default": "Confirmed" },
+      "images": ["String"],
+      "createdAt": { "type": "Date", "default": "Date.now" }
+    },
+    "Invoice": {
+      "invoiceNumber": { "type": "String", "required": true, "unique": true },
+      "tenantId": { "type": "ObjectId", "ref": "User", "required": true },
+      "boxId": { "type": "ObjectId", "ref": "Box", "required": true },
+      "amount": { "type": "Number", "required": true },
+      "type": { "type": "String", "enum": ["Loyer", "Charge_Jiro", "Charge_Rano", "Pub"], "default": "Loyer" },
+      "dueDate": { "type": "Date", "required": true },
+      "status": { "type": "String", "enum": ["Pending", "Paid", "Late", "Canceled"], "default": "Pending" },
+      "paymentDetails": {
+        "method": { "type": "String" },
+        "transactionId": { "type": "String" },
+        "paidAt": { "type": "Date" }
+      },
+      "createdAt": { "type": "Date", "default": "Date.now" }
+    },
+    "Loyalty": {
+      "userId": { "type": "ObjectId", "ref": "User", "required": true, "unique": true },
+      "points": { "type": "Number", "default": 0 },
+      "tier": { "type": "String", "enum": ["Bronze", "Silver", "Gold", "Platinum"], "default": "Bronze" },
+      "history": [{
+        "date": { "type": "Date", "default": "Date.now" },
+        "points": { "type": "Number" },
+        "type": { "type": "String", "enum": ["Earned", "Redeemed"] },
+        "description": { "type": "String" }
+      }],
+      "qrCode": { "type": "String", "unique": true }
+    },
+    "MapFixedItem": {
+      "label": { "type": "String", "required": true, "trim": true },
+      "icon": { "type": "String", "required": true },
+      "floor": { "type": "Number", "required": true, "default": 0 },
+      "x": { "type": "Number", "required": true },
+      "y": { "type": "Number", "required": true },
+      "w": { "type": "Number", "required": true },
+      "h": { "type": "Number", "required": true },
+      "type": { "type": "String", "enum": ["area", "point"], "default": "point" },
+      "style": { "type": "String", "default": "bg-gray-100/90 border-gray-400 text-gray-700" }
+    },
+    "Notification": {
+      "userId": { "type": "ObjectId", "ref": "User", "required": true },
+      "type": { "type": "String", "enum": ["RentDue", "RentLate", "RentGenerated", "PaymentReceived", "ContractExpiring", "OrderStatus", "General"], "required": true },
+      "title": { "type": "String", "required": true },
+      "message": { "type": "String", "required": true },
+      "read": { "type": "Boolean", "default": false },
+      "metadata": {
+        "invoiceId": { "type": "ObjectId", "ref": "Invoice" },
+        "boxId": { "type": "ObjectId", "ref": "Box" },
+        "contractId": { "type": "ObjectId", "ref": "Contract" },
+        "orderId": { "type": "ObjectId", "ref": "Order" }
+      },
+      "createdAt": { "type": "Date", "default": "Date.now" }
+    },
+    "Order": {
+      "shopId": { "type": "ObjectId", "ref": "Box", "required": true },
+      "clientId": { "type": "ObjectId", "ref": "User", "required": true },
+      "date": { "type": "Date", "default": "Date.now" },
+      "description": { "type": "String" },
+      "items": [{
+        "productId": { "type": "ObjectId", "ref": "Product", "required": true },
+        "name": { "type": "String", "required": true },
+        "quantity": { "type": "Number", "required": true },
+        "price": { "type": "Number", "required": true }
+      }],
+      "totalAmount": { "type": "Number", "required": true },
+      "status": { "type": "String", "enum": ["Pending", "Confirmed", "ReadyForCollect", "Collected", "Canceled"], "default": "Pending" },
+      "type": { "type": "String", "enum": ["ClickAndCollect", "Reservation"], "default": "ClickAndCollect" },
+      "paymentStatus": { "type": "String", "enum": ["Unpaid", "Paid"], "default": "Unpaid" },
+      "createdAt": { "type": "Date", "default": "Date.now" }
+    },
+    "Product": {
+      "shopId": { "type": "ObjectId", "ref": "Box", "required": true },
+      "name": { "type": "String", "required": true, "trim": true },
+      "sku": { "type": "String", "required": true, "unique": true },
+      "description": { "type": "String" },
+      "price": { "type": "Number", "required": true },
+      "category": { "type": "String", "required": true },
+      "stock": { "type": "Number", "default": 0 },
+      "minStockLevel": { "type": "Number", "default": 5 },
+      "images": ["String"],
+      "active": { "type": "Boolean", "default": true },
+      "createdAt": { "type": "Date", "default": "Date.now" }
+    },
+    "Reservation": {
+      "userId": { "type": "ObjectId", "ref": "User", "required": true },
+      "shopId": { "type": "ObjectId", "ref": "Box", "required": true },
+      "date": { "type": "Date", "required": true },
+      "timeSlot": { "type": "String", "required": true },
+      "serviceType": { "type": "String", "enum": ["FoodCourtTable", "HairSalonSlot"], "required": true },
+      "numberOfPeople": { "type": "Number", "default": 1 },
+      "status": { "type": "String", "enum": ["Pending", "Confirmed", "Completed", "Canceled"], "default": "Pending" },
+      "notes": { "type": "String" },
+      "createdAt": { "type": "Date", "default": "Date.now" }
+    },
+    "Sale": {
+      "shopId": { "type": "ObjectId", "ref": "Box", "required": true },
+      "items": [{
+        "productId": { "type": "ObjectId", "ref": "Product", "required": true },
+        "name": { "type": "String", "required": true },
+        "quantity": { "type": "Number", "required": true },
+        "price": { "type": "Number", "required": true },
+        "total": { "type": "Number", "required": true }
+      }],
+      "totalAmount": { "type": "Number", "required": true },
+      "paymentMethod": { "type": "String", "enum": ["Cash", "MobileMoney", "Card"], "default": "Cash" },
+      "status": { "type": "String", "enum": ["Completed", "Refunded"], "default": "Completed" },
+      "clientId": { "type": "ObjectId", "ref": "User" },
+      "sellerId": { "type": "ObjectId", "ref": "User" },
+      "createdAt": { "type": "Date", "default": "Date.now" }
+    },
+    "ShopRequest": {
+      "userId": { "type": "ObjectId", "ref": "User", "required": true },
+      "message": { "type": "String", "required": true },
+      "status": { "type": "String", "enum": ["pending", "approved", "rejected"], "default": "pending" },
+      "createdAt": { "type": "Date", "default": "Date.now" }
+    },
+    "StaffPlanning": {
+      "userId": { "type": "ObjectId", "ref": "User", "required": true },
+      "team": { "type": "String", "enum": ["Security", "Maintenance", "Admin"], "required": true },
+      "shifts": [{
+        "start": { "type": "Date", "required": true },
+        "end": { "type": "Date", "required": true },
+        "zone": { "type": "String", "required": true }
+      }],
+      "status": { "type": "String", "enum": ["Active", "OnLeave"], "default": "Active" },
+      "attendance": [{
+        "date": { "type": "Date" },
+        "clockIn": { "type": "Date" },
+        "clockOut": { "type": "Date" },
+        "location": { "lat": "Number", "lng": "Number" }
+      }]
+    },
+    "StockMovement": {
+      "shopId": { "type": "ObjectId", "ref": "Box", "required": true },
+      "date": { "type": "Date", "default": "Date.now" },
+      "description": { "type": "String" },
+      "type": { "type": "String", "enum": ["IN", "OUT"], "required": true },
+      "items": [{
+        "productId": { "type": "ObjectId", "ref": "Product", "required": true },
+        "name": { "type": "String", "required": true },
+        "price": { "type": "Number" },
+        "quantity": { "type": "Number", "required": true }
+      }],
+      "totalAmount": { "type": "Number", "default": 0 },
+      "reason": { "type": "String", "enum": ["Refill", "Sale", "Adjustment", "Return", "Damage"], "required": true },
+      "notes": { "type": "String" },
+      "createdAt": { "type": "Date", "default": "Date.now" }
+    },
+    "User": {
+      "name": { "type": "String", "required": true },
+      "email": { "type": "String", "required": true, "unique": true },
+      "password": { "type": "String", "required": true, "minlength": 6 },
+      "role": { "type": "String", "enum": ["admin", "boutique", "client"], "default": "client" },
+      "shopId": { "type": "ObjectId", "ref": "Box" },
+      "firebaseUid": { "type": "String", "unique": true, "sparse": true },
+      "createdAt": { "type": "Date", "default": "Date.now" }
+    },
+    "UtilityReading": {
+      "boxId": { "type": "ObjectId", "ref": "Box", "required": true },
+      "type": { "type": "String", "enum": ["Electric", "Water"], "required": true },
+      "meterId": { "type": "String", "required": true },
+      "previousIndex": { "type": "Number", "required": true },
+      "currentIndex": { "type": "Number", "required": true },
+      "consumption": { "type": "Number", "required": true },
+      "readingDate": { "type": "Date", "default": "Date.now" },
+      "invoiceStatus": { "type": "String", "enum": ["Pending", "Invoiced"], "default": "Pending" }
+    }
+  }
+}

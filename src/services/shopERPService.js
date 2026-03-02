@@ -33,7 +33,12 @@ class ShopERPService {
         const product = await Product.findById(productId);
         if (!product) throw new Error('Product not found');
 
-        product.stock += quantity;
+        const newStock = product.stock + quantity;
+        if (newStock < 0) {
+            throw new Error(`Insufficient stock for ${product.name}. Current stock: ${product.stock}, requested adjustment: ${quantity}`);
+        }
+
+        product.stock = newStock;
         await product.save();
         return product;
     }
@@ -68,6 +73,16 @@ class ShopERPService {
 
         const numericQty = parseInt(quantity, 10);
         
+        // Update product stock validation before movement
+        if (type === 'OUT') {
+            if (product.stock < numericQty) {
+                throw new Error(`Insufficient stock for ${product.name}. Current stock: ${product.stock}, requested: ${numericQty}`);
+            }
+            product.stock -= numericQty;
+        } else if (type === 'IN') {
+            product.stock += numericQty;
+        }
+
         // Create movement record (Mother Container containing items as children)
         const movement = await StockMovement.create({
             shopId,
@@ -84,14 +99,6 @@ class ShopERPService {
                 quantity: numericQty
             }]
         });
-
-        // Update product stock
-        if (type === 'IN') {
-            product.stock += numericQty;
-        } else if (type === 'OUT') {
-            product.stock -= numericQty;
-            if (product.stock < 0) product.stock = 0; // Prevent negative stock depending on rules
-        }
 
         await product.save();
         

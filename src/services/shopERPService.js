@@ -13,6 +13,13 @@ class ShopERPService {
     }
 
     /**
+     * Get unique categories for a shop
+     */
+    async getCategories(shopId) {
+        return await Product.distinct('category', { shopId });
+    }
+
+    /**
      * Create a new product
      */
     async addProduct(productData) {
@@ -72,6 +79,9 @@ class ShopERPService {
         }
 
         const numericQty = parseInt(quantity, 10);
+        const buyPrice = product.buyPrice || 0;
+        const totalAmount = numericQty * (product.price || 0);
+        const totalBuyAmount = numericQty * buyPrice;
         
         // Update product stock validation before movement
         if (type === 'OUT') {
@@ -91,11 +101,14 @@ class ShopERPService {
             type,
             reason,
             notes,
-            totalAmount: numericQty * (product.price || 0),
+            totalAmount: totalAmount,
+            totalBuyAmount: totalBuyAmount,
+            benefit: (type === 'OUT' && (reason === 'Sale' || reason === 'Refill')) ? (totalAmount - totalBuyAmount) : 0,
             items: [{
                 productId,
                 name: product.name,
                 price: product.price,
+                buyPrice: buyPrice,
                 quantity: numericQty
             }]
         });

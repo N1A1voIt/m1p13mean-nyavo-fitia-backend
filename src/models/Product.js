@@ -23,6 +23,11 @@ const productSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
+    buyPrice: {
+        type: Number,
+        required: true,
+        default: 0
+    },
     category: {
         type: String,
         required: true

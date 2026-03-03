@@ -35,6 +35,9 @@ class OrderService {
             orderData.description = `Digital Order containing ${orderData.items.length} item(s)`;
         }
 
+        let totalBuyAmount = 0;
+        const enrichedItems = [];
+
         // Final stock check before checkout
         for (const item of orderData.items) {
             const product = await Product.findById(item.productId);
@@ -45,9 +48,23 @@ class OrderService {
             if (!product.active) {
                 throw new Error(`${product.name} is currently out of sale`);
             }
+
+            const buyPrice = product.buyPrice || 0;
+            totalBuyAmount += (buyPrice * item.quantity);
+            enrichedItems.push({
+                ...item,
+                buyPrice: buyPrice
+            });
         }
 
-        return await Order.create(orderData);
+        const newOrderData = {
+            ...orderData,
+            items: enrichedItems,
+            totalBuyAmount,
+            benefit: orderData.totalAmount - totalBuyAmount
+        };
+
+        return await Order.create(newOrderData);
     }
 
     /**
@@ -100,15 +117,29 @@ class OrderService {
             description: `Click & Collect Order ${orderId}`,
             type: 'OUT',
             reason: 'Sale',
-            notes: `Validation of Order ${orderId}`,
+            notes: `Web order collection`,
             totalAmount: order.totalAmount,
+            totalBuyAmount: order.totalBuyAmount || 0,
+            benefit: order.benefit || 0,
             items: order.items.map(item => ({
                 productId: item.productId,
                 name: item.name,
                 price: item.price,
+                buyPrice: item.buyPrice || 0,
                 quantity: item.quantity
             }))
         });
+        //     type: 'OUT',
+        //     reason: 'Sale',
+        //     notes: `Validation of Order ${orderId}`,
+        //     totalAmount: order.totalAmount,
+        //     items: order.items.map(item => ({
+        //         productId: item.productId,
+        //         name: item.name,
+        //         price: item.price,
+        //         quantity: item.quantity
+        //     }))
+        // });
         
         // Award loyalty points (1 point per 1000 MGA, example rule)
         if (order.clientId) {

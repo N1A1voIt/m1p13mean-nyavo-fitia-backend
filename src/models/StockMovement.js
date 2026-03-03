@@ -31,12 +31,23 @@ const stockMovementSchema = new mongoose.Schema({
         price: {
             type: Number
         },
+        buyPrice: {
+            type: Number
+        },
         quantity: {
             type: Number,
             required: true
         }
     }],
     totalAmount: {
+        type: Number,
+        default: 0
+    },
+    totalBuyAmount: {
+        type: Number,
+        default: 0
+    },
+    benefit: {
         type: Number,
         default: 0
     },

@@ -15,12 +15,30 @@ class SaleService {
     async processSale(saleData) {
         const { shopId, items, paymentMethod, totalAmount, sellerId, clientId, loyaltyCode } = saleData;
 
+        // 1. Fetch Product buyPrices to calculate benefits
+        let totalBuyAmount = 0;
+        const enrichedItems = [];
+
+        for (const item of items) {
+            const product = await Product.findById(item.productId);
+            const buyPrice = product?.buyPrice || 0;
+            const itemTotalBuy = buyPrice * item.quantity;
+            totalBuyAmount += itemTotalBuy;
+
+            enrichedItems.push({
+                ...item,
+                buyPrice: buyPrice
+            });
+        }
+
         // 1. Create Sale Record
         const sale = await Sale.create({
             shopId,
-            items,
+            items: enrichedItems,
             paymentMethod,
             totalAmount,
+            totalBuyAmount,
+            benefit: totalAmount - totalBuyAmount,
             sellerId,
             clientId
         });
@@ -40,10 +58,11 @@ class SaleService {
             reason: 'Sale',
             notes: `Physical register sale`,
             totalAmount: totalAmount,
-            items: items.map(item => ({
+            items: enrichedItems.map(item => ({
                 productId: item.productId,
                 name: item.name,
                 price: item.price,
+                buyPrice: item.buyPrice,
                 quantity: item.quantity
             }))
         });

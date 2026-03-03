@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const {
     getProducts,
+    getCategories,
     addProduct,
     updateProduct,
     deleteProduct,
@@ -22,6 +23,8 @@ router.route('/stock-movements')
 router.route('/')
     .get(getProducts)
     .post(addProduct);
+
+router.get('/categories', getCategories);
 
 router.route('/:id')
     .patch(updateProduct)

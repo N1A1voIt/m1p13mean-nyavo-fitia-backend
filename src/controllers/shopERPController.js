@@ -21,6 +21,15 @@ exports.getProducts = asyncHandler(async (req, res) => {
     res.status(200).json({ success: true, count: products.length, data: products });
 });
 
+exports.getCategories = asyncHandler(async (req, res) => {
+    const shopId = req.user.role === 'boutique' ? req.user.shopId : (req.query.shopId || req.user.shopId);
+    
+    if (!shopId) return res.status(400).json({ success: false, message: 'Shop ID required' });
+
+    const categories = await shopERPService.getCategories(shopId);
+    res.status(200).json({ success: true, data: categories });
+});
+
 exports.addProduct = asyncHandler(async (req, res) => {
     // Ensure product is added to the user's shop
     if (req.user.role === 'boutique') {
@@ -86,19 +95,19 @@ exports.getAccountingStats = asyncHandler(async (req, res) => {
     await Promise.all([
         Sale.aggregate([
             { $match: { shopId: oid, status: 'Completed' } },
-            { $group: { _id: null, total: { $sum: '$totalAmount' }, count: { $sum: 1 } } }
+            { $group: { _id: null, total: { $sum: '$totalAmount' }, benefit: { $sum: '$benefit' }, count: { $sum: 1 } } }
         ]),
         Sale.aggregate([
             { $match: { shopId: oid, status: 'Completed', createdAt: { $gte: startOfMonth } } },
-            { $group: { _id: null, total: { $sum: '$totalAmount' } } }
+            { $group: { _id: null, total: { $sum: '$totalAmount' }, benefit: { $sum: '$benefit' } } }
         ]),
         Sale.aggregate([
             { $match: { shopId: oid, status: 'Completed', createdAt: { $gte: startOfLastMonth, $lte: endOfLastMonth } } },
-            { $group: { _id: null, total: { $sum: '$totalAmount' } } }
+            { $group: { _id: null, total: { $sum: '$totalAmount' }, benefit: { $sum: '$benefit' } } }
         ]),
         Sale.aggregate([
             { $match: { shopId: oid, status: 'Completed', createdAt: { $gte: startOfToday } } },
-            { $group: { _id: null, total: { $sum: '$totalAmount' } } }
+            { $group: { _id: null, total: { $sum: '$totalAmount' }, benefit: { $sum: '$benefit' } } }
         ]),
         Sale.aggregate([
             { $match: { shopId: oid, status: 'Completed' } },
@@ -116,19 +125,19 @@ exports.getAccountingStats = asyncHandler(async (req, res) => {
     await Promise.all([
         Order.aggregate([
             { $match: { shopId: oid, status: activeOrderStatuses } },
-            { $group: { _id: null, total: { $sum: '$totalAmount' }, count: { $sum: 1 } } }
+            { $group: { _id: null, total: { $sum: '$totalAmount' }, benefit: { $sum: '$benefit' }, count: { $sum: 1 } } }
         ]),
         Order.aggregate([
             { $match: { shopId: oid, status: activeOrderStatuses, createdAt: { $gte: startOfMonth } } },
-            { $group: { _id: null, total: { $sum: '$totalAmount' } } }
+            { $group: { _id: null, total: { $sum: '$totalAmount' }, benefit: { $sum: '$benefit' } } }
         ]),
         Order.aggregate([
             { $match: { shopId: oid, status: activeOrderStatuses, createdAt: { $gte: startOfLastMonth, $lte: endOfLastMonth } } },
-            { $group: { _id: null, total: { $sum: '$totalAmount' } } }
+            { $group: { _id: null, total: { $sum: '$totalAmount' }, benefit: { $sum: '$benefit' } } }
         ]),
         Order.aggregate([
             { $match: { shopId: oid, status: activeOrderStatuses, createdAt: { $gte: startOfToday } } },
-            { $group: { _id: null, total: { $sum: '$totalAmount' } } }
+            { $group: { _id: null, total: { $sum: '$totalAmount' }, benefit: { $sum: '$benefit' } } }
         ]),
         Order.aggregate([
             { $match: { shopId: oid, status: activeOrderStatuses } },
@@ -155,17 +164,35 @@ exports.getAccountingStats = asyncHandler(async (req, res) => {
     // ── Totals ───────────────────────────────────────────────────────────────
     const posRevenue    = posLifetime[0]?.total    || 0;
     const onlineRevenue = orderLifetime[0]?.total  || 0;
+    const posBenefit    = posLifetime[0]?.benefit  || 0;
+    const onlineBenefit = orderLifetime[0]?.benefit || 0;
+
     const posMonthRev   = posMonth[0]?.total       || 0;
     const onlineMonthRev = orderMonth[0]?.total    || 0;
+    const posMonthBen   = posMonth[0]?.benefit     || 0;
+    const onlineMonthBen = orderMonth[0]?.benefit  || 0;
+
     const posLastMonthRev = posLastMonth[0]?.total || 0;
     const onlineLastMonthRev = orderLastMonth[0]?.total || 0;
+    const posLastMonthBen = posLastMonth[0]?.benefit || 0;
+    const onlineLastMonthBen = orderLastMonth[0]?.benefit || 0;
+
     const posTodayRev   = posToday[0]?.total       || 0;
     const onlineTodayRev = orderToday[0]?.total    || 0;
+    const posTodayBen   = posToday[0]?.benefit     || 0;
+    const onlineTodayBen = orderToday[0]?.benefit  || 0;
 
     const thisMonthRevenue = posMonthRev + onlineMonthRev;
     const lastMonthRevenue = posLastMonthRev + onlineLastMonthRev;
+    const thisMonthBenefit = posMonthBen + onlineMonthBen;
+    const lastMonthBenefit = posLastMonthBen + onlineLastMonthBen;
+
     const growthPct = lastMonthRevenue > 0
         ? Math.round(((thisMonthRevenue - lastMonthRevenue) / lastMonthRevenue) * 100)
+        : null;
+
+    const benefitGrowthPct = lastMonthBenefit > 0
+        ? Math.round(((thisMonthBenefit - lastMonthBenefit) / lastMonthBenefit) * 100)
         : null;
 
     const byPayment = [
@@ -177,14 +204,21 @@ exports.getAccountingStats = asyncHandler(async (req, res) => {
         success: true,
         data: {
             lifetimeRevenue:  posRevenue + onlineRevenue,
+            lifetimeBenefit:  posBenefit + onlineBenefit,
             posRevenue,
             onlineRevenue,
+            posBenefit,
+            onlineBenefit,
             posCount:         posLifetime[0]?.count  || 0,
             onlineCount:      orderLifetime[0]?.count || 0,
             todayRevenue:     posTodayRev + onlineTodayRev,
+            todayBenefit:     posTodayBen + onlineTodayBen,
             thisMonthRevenue,
+            thisMonthBenefit,
             lastMonthRevenue,
+            lastMonthBenefit,
             growthPct,
+            benefitGrowthPct,
             byPayment,
             topProducts
         }
